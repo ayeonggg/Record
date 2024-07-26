@@ -1,0 +1,55 @@
+# -*- coding: utf-8 -*-
+import serial
+import pynmea2
+from collections import deque
+
+
+serial_port = "/dev/serial0"  
+baudrate = 9600
+
+
+data_queue = deque()
+
+def parse_nmea_sentence(nmea_sentence):
+    try:
+        msg = pynmea2.parse(nmea_sentence)
+        if isinstance(msg, pynmea2.types.talker.GLL) or isinstance(msg, pynmea2.types.talker.GGA):
+            return msg
+    except pynmea2.ParseError as e:
+        print(f"Parse error: {e}")
+    return None
+
+def read_gps_data():
+    try:
+      
+        ser = serial.Serial(serial_port, baudrate, timeout=1)
+        
+        while True:
+          
+            line = ser.readline().decode('ascii', errors='replace').strip()
+            print(f"Read line: {line}")
+            
+            if line.startswith('$GPGGA') or line.startswith('$GPGLL'):
+                data_queue.append(line)
+                
+                
+                if data_queue:
+                    sentence = data_queue.popleft()
+                    msg = parse_nmea_sentence(sentence)
+                    if msg:
+                        if isinstance(msg, pynmea2.types.talker.GLL):
+                            print(f"Latitude: {msg.latitude} {msg.lat_dir}, Longitude: {msg.longitude} {msg.lon_dir}")
+                        elif isinstance(msg, pynmea2.types.talker.GGA):
+                            print(f"Timestamp: {msg.timestamp}")
+                            print(f"Latitude: {msg.latitude} {msg.lat_dir}")
+                            print(f"Longitude: {msg.longitude} {msg.lon_dir}")
+                            print(f"Altitude: {msg.altitude} {msg.altitude_units}")
+                            print(f"Number of Satellites: {msg.num_sats}")
+                            print()
+    except serial.SerialException as e:
+        print(f"Serial error: {e}")
+    except pynmea2.ParseError as e:
+        print(f"Parse error: {e}")
+
+if __name__ == "__main__":
+    read_gps_data()
