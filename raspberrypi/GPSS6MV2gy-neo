@@ -1,0 +1,37 @@
+# -*- coding: utf-8 -*-
+import serial
+import pynmea2
+
+
+serial_port = "/dev/serial0"  
+baudrate = 9600
+
+def read_gps_data():
+    try:
+        
+        ser = serial.Serial(serial_port, baudrate, timeout=1)
+        
+        while True:
+           
+            line = ser.readline().decode('ascii', errors='replace')
+            print(f"Read line: {line.strip()}")
+            
+            if line.startswith('$GPGGA'):
+                 try:
+                     msg = pynmea2.parse(line)
+                     print(f"Timestamp: {msg.timestamp}")
+                     print(f"Latitude: {msg.latitude} {msg.lat_dir}")
+                     print(f"Longitude: {msg.longitude} {msg.lon_dir}")
+                     print(f"Altitude: {msg.altitude} {msg.altitude_units}")
+                     print(f"Number of Satellites: {msg.num_sats}")
+                     print()
+                 except pynmea2.ParseError as e:
+                     print(f"Parse error: {e}")
+                
+    except serial.SerialException as e:
+        print(f"Serial error: {e}")
+    except pynmea2.ParseError as e:
+        print(f"Parse error: {e}")
+
+if __name__ == "__main__":
+    read_gps_data()
