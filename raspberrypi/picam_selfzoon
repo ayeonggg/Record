@@ -1,0 +1,53 @@
+from picamera2 import Picamera2, Preview
+import time
+
+# Initialize the camera
+picam2 = Picamera2()
+picam2.zoom = (0, 0, 1, 1) 
+
+def zoom_in(picam2, zoom_step=0.2):
+    """ Zoom in the camera view. """
+    current_zoom = picam2.zoom
+    new_zoom_width = max(current_zoom[2] - zoom_step, 0.1)
+    new_zoom_height = max(current_zoom[3] - zoom_step, 0.1)
+    x_offset = (1 - new_zoom_width) / 2
+    y_offset = (1 - new_zoom_height) / 2
+    picam2.zoom = (x_offset, y_offset, new_zoom_width, new_zoom_height)
+    print(f"Zoomed in to: {picam2.zoom}")
+
+def zoom_out(picam2, zoom_step=0.2):
+    """ Zoom out the camera view. """
+    current_zoom = picam2.zoom
+    new_zoom_width = min(current_zoom[2] + zoom_step, 1.0)
+    new_zoom_height = min(current_zoom[3] + zoom_step, 1.0)
+    x_offset = (1 - new_zoom_width) / 2
+    y_offset = (1 - new_zoom_height) / 2
+    picam2.zoom = (x_offset, y_offset, new_zoom_width, new_zoom_height)
+    print(f"Zoomed out to: {picam2.zoom}")
+
+try:
+    # Start the camera and configure settings
+    picam2.configure(picam2.create_preview_configuration(main={"size": (640, 480)}))
+    picam2.start_preview(Preview.QTGL)
+    picam2.start()
+    time.sleep(2)  # Wait for the preview to initialize
+
+    # Wait for user input to control zoom in/out
+    while True:
+        command = input("Enter '+' to zoom in, '-' to zoom out, or 'q' to quit: ").strip()
+        if command == '+':
+            zoom_in(picam2)
+        elif command == '-':
+            zoom_out(picam2)
+        elif command == 'q':
+            break
+        else:
+            print("Invalid command. Please enter '+' or '-' or 'q'.")
+
+finally:
+    # Stop the camera preview and release resources
+    try:
+        picam2.stop_preview()
+    except RuntimeError:
+        print("No preview was started.")
+    picam2.close()
