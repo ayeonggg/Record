@@ -1,0 +1,57 @@
+import time
+import numpy as np
+import cv2
+from picamera2 import Picamera2
+
+# Initialize the camera
+camera = Picamera2()
+
+# Configure camera settings
+config = camera.create_preview_configuration(main={"size": (640, 480)})
+camera.configure(config)
+
+# Start the camera
+camera.start()
+
+# Zoom parameters
+zoom_level = 1.0  # Initial zoom level
+zoom_step = 0.1   # Zoom step size
+
+try:
+    while True:
+        # Capture a frame
+        frame = camera.capture_array()
+
+        # Calculate crop dimensions based on zoom level
+        zoom_width = int(frame.shape[1] / zoom_level)
+        zoom_height = int(frame.shape[0] / zoom_level)
+        x_start = (frame.shape[1] - zoom_width) // 2
+        y_start = (frame.shape[0] - zoom_height) // 2
+        x_end = x_start + zoom_width
+        y_end = y_start + zoom_height
+
+        # Crop the frame
+        cropped_frame = frame[y_start:y_end, x_start:x_end]
+
+        # Display the cropped frame
+        cv2.imshow('Zoomed Frame', cropped_frame)
+
+        # Wait for key press
+        key = cv2.waitKey(1) & 0xFF
+
+        # Handle key presses
+        if key == ord('q'):
+            break
+        elif key == ord('z'):  # Zoom in
+            zoom_level -= zoom_step
+            zoom_level = max(zoom_level, 1.0)  # Ensure zoom level doesn't go below 1.0
+        elif key == ord('x'):  # Zoom out
+            zoom_level += zoom_step
+            zoom_level = min(zoom_level, 10.0)  # Adjust the upper limit as needed
+
+finally:
+    # Clean up
+    cv2.destroyAllWindows()
+    camera.stop()
+
+
