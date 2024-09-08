@@ -17,7 +17,7 @@ Servo myservo;
 #define LIGHTPIN A0   // 주변광 센서 읽기
 #define RAINPIN A1    // 비 센서 아날로그 입력 핀
 #define PIEZO 7       // 피에조 버저 핀
-#define INTERVAL 10   // 10vvvv분 1분 간격 (10 샘플)
+#define INTERVAL 10   // 10분 1분 간격 (10 샘플)
 #define SERVO 10
 
 // 변수
@@ -81,28 +81,28 @@ float getValidFloatInput(String prompt) {
 }
 
 void setUserHumi() {
-  Serial.println(F("Set the humidity: "));
+  //Serial.println(F("Set the humidity: "));
   userHumi = getValidFloatInput(F("Set the humidity (float greater than 0): "));
   Serial.print(F("Set humidity: "));
   Serial.println(userHumi);
 }
 
 void setUserHot() {
-  Serial.println(F("\nSet the hot temperature: "));
+  //Serial.println(F("\nSet the hot temperature: "));
   userHot = getValidFloatInput(F("Set the hot temperature (float greater than 0): "));
   Serial.print(F("Set hot temperature: "));
   Serial.println(userHot);
 }
 
 void setUserCool() {
-  Serial.println(F("\nSet the cool temperature: "));
+  //Serial.println(F("\nSet the cool temperature: "));
   userCool = getValidFloatInput(F("Set the cool temperature (float greater than 0): "));
   Serial.print(F("Set cool temperature: "));
   Serial.println(userCool);
 }
 
 void setUserDust() {
-  Serial.println(F("Set the dust: "));
+  //Serial.println(F("\nSet the dust: "));
   userDust = getValidFloatInput(F("Set the dust (float greater than 0): "));
   Serial.print(F("Set dust: "));
   Serial.println(userDust);
@@ -110,7 +110,7 @@ void setUserDust() {
 
 
 void setUserLight() {
-  Serial.println(F("Set the light: "));
+  //Serial.println(F("\nSet the light: "));
   userLight = getValidFloatInput(F("Set the light (float greater than 0): "));
   Serial.print(F("Set light: "));
   Serial.println(userLight);
@@ -137,6 +137,8 @@ void askToSetValues() {
         setUserHumi();
         setUserHot();
         setUserCool();
+        setUserDust();
+        setUserLight();
         Serial.println(F("\n10 minute timer has been reset."));
         break;
       } else if (response.equalsIgnoreCase("n")) {
@@ -287,11 +289,11 @@ void controlServoBasedOnAverage(float avgTemp1, float avgHum1, float avgTemp2, f
   Serial.println(discomfortIndex2, 2);
 
 
-  // 상황에 따른 서보 제어
+   // 불쾌지수에 따라 서보 제어
   if (avgTemp2 > userHot || avgHum2 > userHumi || discomfortIndex1 < discomfortIndex2 || temp < temp2) {
     myservo.write(180);  // 서보를 열림 위치로 회전
     Serial.println(F("door Opened"));
-  } else if (temp2 < userCool || pm25Value>userDust || (discomfortIndex1 > discomfortIndex2 || temp > temp2 || discomfortIndex1 >= 70 || temp >= 30 || hum >= 80 || rainValue > 1000 || pm25Value >= 81) {
+  } else if (temp2 < userCool || pm25Value > userDust || (discomfortIndex1 > discomfortIndex2 || temp > temp2 || discomfortIndex1 >= 70 || temp >= 30 || hum >= 80 || rainValue > 1000 || pm25Value >= 81)) {
     myservo.write(0);  // 서보를 닫힘 위치로 회전
     Serial.println(F("door Closed"));
   } else {
@@ -299,13 +301,11 @@ void controlServoBasedOnAverage(float avgTemp1, float avgHum1, float avgTemp2, f
     Serial.println(F("door Neutral"));
   }
 
-
-  if (reading> userLight){
+  if (reading > userLight) {
     for (pos = 65; pos >= 0; pos -= 1) {  // 65도에서 0도까지 이동
       myservo.write(pos);                 // 서보를 'pos' 위치로 이동
       break;                              // 서보가 위치에 도달할 때까지 15ms 대기
     }
-   
   }
 }
 
