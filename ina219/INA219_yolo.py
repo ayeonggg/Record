@@ -54,6 +54,9 @@ def main():
         print("Cannot open camera")
         return
 
+    prev_time = time.time()  # 이전 시간 저장
+    frame_count = 0  # 프레임 수 초기화
+
     try:
         while True:
             # 전력 데이터 측정
@@ -80,6 +83,19 @@ def main():
             cv2.putText(frame, f"Bus Voltage: {bus_voltage:.2f} V", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             cv2.putText(frame, f"Current: {current:.2f} mA", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
             cv2.putText(frame, f"Power: {power:.2f} mW", (10, 90), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+
+            # FPS 계산
+            frame_count += 1
+            current_time = time.time()
+            if current_time - prev_time >= 1.0:  # 1초마다
+                fps = frame_count / (current_time - prev_time)
+                prev_time = current_time
+                frame_count = 0
+            else:
+                fps = 0  # 초기 FPS 값
+
+            # FPS 표시
+            cv2.putText(frame, f"FPS: {fps:.2f}", (10, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
             # 화면에 표시
             cv2.imshow("Power Consumption Analysis", frame)
