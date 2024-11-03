@@ -2,7 +2,7 @@ import time
 import board
 import busio
 import subprocess
-import smbus  # I2C 통신 라이브러리
+import smbus2 as smbus
 
 class INA219Calculator:
     def __init__(self, i2c_address=0x40):
