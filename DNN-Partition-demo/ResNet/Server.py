@@ -23,7 +23,6 @@ class NetExit3Part2L(nn.Module):
 
 # GPU에서 학습된 모델 로드
 model_path = "/home/ayeong/Record/NetExit3Part2_L.pth"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = NetExit3Part2L().to(device)
 model.load_state_dict(torch.load(model_path, map_location=device), strict=False)
 
