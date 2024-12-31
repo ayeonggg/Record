@@ -22,7 +22,7 @@ class NetExit3Part2L(nn.Module):
         return x
 
 # GPU에서 학습된 모델 로드
-model_path = "/home/ayeong/Record/NetExit3Part2_L.pth"
+model_path = "/home/srlab/.vscode-server/ayeong/resnet_data_out/models/NetExit1Part2_epoch_500.pth"
 model = NetExit3Part2L().to(device)
 model.load_state_dict(torch.load(model_path, map_location=device), strict=False)
 
@@ -53,7 +53,7 @@ def calculate_accuracy(predictions, labels):
     correct = (predicted_labels == labels).sum()
     accuracy = correct / len(labels)
     return accuracy
-partition_thrift = thriftpy2.load("/home/ayeong/Record/DNN-Partition-demo/partition.thrift", module_name="partition_thrift")
+partition_thrift = thriftpy2.load("/home/srlab/.vscode-server/partition.thrift", module_name="partition_thrift")
 
 # Thrift 서버 핸들러 클래스 정의
 class PartitionHandler:
@@ -77,7 +77,7 @@ class PartitionHandler:
         accuracy = correct / len(labels)
         return accuracy
 # Partition 관련 Thrift 파일 로드
-    partition_thrift = thriftpy2.load("/home/ayeong/Record/DNN-Partition-demo/partition.thrift", module_name="partition_thrift")
+    partition_thrift = thriftpy2.load("/home/srlab/.vscode-server/partition.thrift", module_name="partition_thrift")
     # 수정된 정확도 출력 예시
     def partition(self, inputs, labels):
         print(f"Received input: {inputs}")
