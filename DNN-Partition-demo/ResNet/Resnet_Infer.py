@@ -1,28 +1,32 @@
 import torch
-import numpy as np
-from Model_Pair import NetExit1Part1L, NetExit1Part1R, NetExit3Part2L, NetExit3Part2R
-from config import PARAM_PATH
 import os
+from config import PARAM_PATH
+from Model_Pair import ResNetExit1Part1L, ResNetExit1Part1R, ResNetExit2Part1L, ResNetExit2Part1R, \
+                      ResNetExit3Part1L, ResNetExit3Part1R, ResNetExit4Part1L, ResNetExit4Part1R
 
-# 모델 매핑 딕셔너리 정의
+# 모델 매핑 딕셔너리 정의 (클래스 이름을 문자열로 매핑)
 netMapping = {
-    'NetExit1Part1': [NetExit1Part1L, NetExit1Part1R],
-    'NetExit3Part2': [NetExit3Part2L, NetExit3Part2R],
-    # 필요한 다른 모델 매핑 추가
+    'NetExit1Part1': [ResNetExit1Part1L, ResNetExit1Part1R],
+    'NetExit2Part1': [ResNetExit2Part1L, ResNetExit2Part1R],
+    'NetExit3Part1': [ResNetExit3Part1L, ResNetExit3Part1R],
+    'NetExit4Part1': [ResNetExit4Part1L, ResNetExit4Part1R]
 }
 
 def infer(image, netPair, ep, pp, cORs):
     try:
-        # netPair에 해당하는 모델 리스트 가져오기
-        net_class_list = netMapping[netPair]
-        
+        # netPair에 해당하는 모델 클래스 이름 리스트 가져오기
+        class_names = netMapping[netPair]
+
         # cORs에 따라 'L' 또는 'R' 모델 선택
         if cORs == 'L':
-            net_class = net_class_list[0]  # 'L'일 경우 첫 번째 모델 클래스
+            class_name = class_names[0]  # 'L'일 경우 첫 번째 모델 클래스
         elif cORs == 'R':
-            net_class = net_class_list[1]  # 'R'일 경우 두 번째 모델 클래스
+            class_name = class_names[1]  # 'R'일 경우 두 번째 모델 클래스
         else:
             raise ValueError(f"Invalid cORs value: {cORs}")
+        
+        # 동적으로 클래스 가져오기
+        net_class = getattr(Model_Pair, class_name)
         
         # 모델 인스턴스 생성
         net = net_class()
