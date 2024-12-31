@@ -24,7 +24,9 @@ end = False
 # 디렉토리 경로 설정
 CHECKPOINT_DIR = '/home/srlab/.vscode-server/ayeong/resnet_data_out/checkpoints'
 PARAM_PATH = '/home/srlab/.vscode-server/ayeong/resnet_data_out/models/'
-netPair = 'NetExit3Part2'
+
+# 파트 이름 정의
+netParts = ['NetExit1Part1', 'NetExit1Part2', 'NetExit2Part1', 'NetExit2Part2', 'NetExit3Part1', 'NetExit3Part2', 'NetExit4Part1', 'NetExit4Part2']
 
 # 디렉토리 생성 (없을 경우)
 os.makedirs(CHECKPOINT_DIR, exist_ok=True)
@@ -38,8 +40,8 @@ transform = transforms.Compose([
 train_dataset = datasets.CIFAR10(root='/home/srlab/DNN-Partition-demo/CIFAR/cifar-10-batches-py', train=True, transform=transform, download=True)
 train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
 
-# 학습 루프 (최대 1000 에포크)
-max_epochs = 1000
+# 학습 루프
+max_epochs = 500
 while epoch < max_epochs:
     resnet.train()  # 모델을 학습 모드로 전환
     correct_count = 0
@@ -60,21 +62,16 @@ while epoch < max_epochs:
         accuracy = correct_count / total_count
         print(f"\nEpoch [{epoch + 1}/{max_epochs}] - Model Accuracy = {accuracy:.4f}")
 
-        # 모델 저장 경로 설정 및 저장
-        save_path = os.path.join(PARAM_PATH, f'model_epoch_{epoch + 1}.pth')
-        torch.save(resnet.state_dict(), save_path)
-        print(f'Model saved at {save_path}')
-
-        # 정확도가 95%를 넘으면 학습 중단
-        if accuracy > 0.95:
-            end = True
-            break  # 학습 중단
+        # 모델 저장 경로 설정 및 저장 (정확도와 관계없이 매 에포크마다 저장)
+        for i, netPart in enumerate(netParts):
+            save_path = os.path.join(PARAM_PATH, f'{netPart}_epoch_{epoch + 1}.pth')
+            torch.save(resnet.state_dict(), save_path)
+            print(f'{netPart} 모델 저장됨: {save_path}')
 
     # 100 에포크마다 체크포인트 저장
     if (epoch + 1) % 100 == 0:
         checkpoint_path = os.path.join(CHECKPOINT_DIR, f'epoch_{epoch + 1}_model.pt')
         torch.save(resnet.state_dict(), checkpoint_path)
-        torch.save(resnet.state_dict(), os.path.join(PARAM_PATH, f'{netPair}_L.pth'))
         print(f'Checkpoint saved at epoch {epoch + 1}')
 
     epoch += 1  # 에포크 증가
