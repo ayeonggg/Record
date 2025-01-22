@@ -19,7 +19,7 @@ charging_stations = [
 def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371  # 지구 반지름 (km)
     dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
+    dlon = math.radians(lat2 - lon1)
     a = (
         math.sin(dlat / 2) ** 2
         + math.cos(math.radians(lat1)) *
@@ -42,12 +42,20 @@ def find_nearest_station(current_location):
             nearest_station = station
     return nearest_station
 
-# 비상 착륙 함수
-async def emergency_landing(drone, location):
-    print(f"-- Emergency landing at location: {location}")
-    await drone.action.goto_location(location[0], location[1], location[2], 0.0)
-    await asyncio.sleep(5)
-    await drone.action.land()
+# 바람으로 인한 기울기 변화 조정
+async def adjust_for_wind(drone):
+    print("-- Adjusting for wind disturbance")
+    async for attitude in drone.telemetry.attitude_euler():
+        roll = abs(attitude.roll_deg)
+        pitch = abs(attitude.pitch_deg)
+
+        if roll > 30 or pitch > 30:
+            print(f"Wind detected! Roll: {roll:.2f}, Pitch: {pitch:.2f}")
+            await drone.action.set_attitude(0.0, 0.0, 0.0, 0.5)
+            await asyncio.sleep(5)
+            print("Wind disturbance cleared.")
+            return True
+        return False
 
 # GPS 오류 보정
 def correct_gps_error(last_known_location, current_location, threshold=10):
@@ -74,21 +82,6 @@ async def set_offboard_mode(drone):
         await drone.action.land()
         return False
     return True
-
-# 바람으로 인한 기울기 변화 조정
-async def adjust_for_wind(drone):
-    print("-- Adjusting for wind disturbance")
-    async for attitude in drone.telemetry.attitude_euler():
-        roll = abs(attitude.roll_deg)
-        pitch = abs(attitude.pitch_deg)
-
-        if roll > 30 or pitch > 30:
-            print(f"Wind detected! Roll: {roll:.2f}, Pitch: {pitch:.2f}")
-            await drone.action.set_attitude(0.0, 0.0, 0.0, 0.5)
-            await asyncio.sleep(5)
-            print("Wind disturbance cleared.")
-            return True
-        return False
 
 # 이벤트 루프
 async def event_loop(drone, state_queue, emergency_states):
@@ -134,6 +127,7 @@ async def event_loop(drone, state_queue, emergency_states):
                 return True
 
             elif emergency_states["wind_detected"]:
+                print("Wind detected! Adjusting for wind.")
                 wind_cleared = await adjust_for_wind(drone)
                 if wind_cleared:
                     emergency_states["wind_detected"] = False
@@ -142,6 +136,13 @@ async def event_loop(drone, state_queue, emergency_states):
 
             await asyncio.sleep(5)
             return False
+
+# 비상 착륙 함수
+async def emergency_landing(drone, location):
+    print(f"-- Emergency landing at location: {location}")
+    await drone.action.goto_location(location[0], location[1], location[2], 0.0)
+    await asyncio.sleep(5)
+    await drone.action.land()
 
 # 드론 제어 및 모니터링
 async def fly_monitoring(drone, state_queue, emergency_states):
@@ -172,6 +173,23 @@ async def fly_monitoring(drone, state_queue, emergency_states):
                 await asyncio.sleep(1)
                 continue
             break
+
+# 사용자 입력을 관리하는 비동기 함수
+async def user_input(state_queue):
+    while True:
+        print("\nPress 'state' and Enter to update emergency states.")
+        a = await ainput()
+        if a.strip().lower() == 'state':
+            updates = {}
+            print("\nUpdate emergency states:")
+            emergency_keys = ["wind_detected", "low_battery_detected", "engine_failure_detected", "communication_lost", "gps error"]
+            for key in emergency_keys:
+                value = await ainput(f"{key} (True/False): ")
+                while value not in ["True", "False"]:
+                    print("Invalid input! Please enter 'True' or 'False'.")
+                    value = await ainput(f"{key} (True/False): ")
+                updates[key] = value == "True"
+            await state_queue.put(updates)
 
 # 메인 실행
 async def main():
@@ -220,27 +238,17 @@ async def main():
 
     except KeyboardInterrupt:
         print("Ctrl+C detected! Initiating landing.")
-        await drone.action.land()
-        await asyncio.sleep(10)
+        try:
+            await drone.action.land()
+            await asyncio.sleep(10)
+        except Exception as e:
+            print(f"Landing failed: {e}")
     finally:
-        await drone.close()
-
-# 사용자 입력을 관리하는 비동기 함수
-async def user_input(state_queue):
-    while True:
-        print("\nPress 'state' and Enter to update emergency states.")
-        a = await ainput()
-        if a.strip().lower() == 'state':
-            updates = {}
-            print("\nUpdate emergency states:")
-            emergency_keys = ["wind_detected", "low_battery_detected", "engine_failure_detected", "communication_lost", "gps error"]
-            for key in emergency_keys:
-                value = await ainput(f"{key} (True/False): ")
-                while value not in ["True", "False"]:
-                    print("Invalid input! Please enter 'True' or 'False'.")
-                    value = await ainput(f"{key} (True/False): ")
-                updates[key] = value == "True"
-            await state_queue.put(updates)
+        try:
+            print("Disconnecting drone...")
+            await drone.disconnect()
+        except Exception as e:
+            print(f"Failed to disconnect: {e}")
 
 if __name__ == "__main__":
     asyncio.run(main())
