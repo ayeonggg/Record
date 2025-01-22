@@ -18,9 +18,9 @@ export PX4_HOME_ALT=30
 export PX_SIM_SPEED_FACTOR=2
 
 ## 초기 코드 구상
-
 charging_station: 2차원 리스트 튜플  
-  ↓  
+  ↓ 
+**함수 정의**
 GPS 지구 모형 반영 최단거리 계산 함수 (하버사인 공식 사용)  
 최단 경로 노드 계산 함수  
 비상착륙 함수 
@@ -43,11 +43,11 @@ if __name__ == "__main__":
 
 
 ## 구현 중간 상황
-
 charging_station :2차원 리스트 튜플
-&downarrow;
+  ↓
 드론오류 상태 초기값=False: 딕셔너리
   ↓
+  **함수 정의**
 GPS 지구 모형 반영 최단거리 계산 함수 (하버사인 공식 사용)  
 최단 경로 노드 계산 함수  
 비상착륙 함수 
@@ -60,7 +60,7 @@ async def user_input함수 정의: if조건문
   ↓
 async def fly_monitering함수 정의
   ↓
-이벤트 루프:
+이벤트 루프: drone, state_queue인자
 드론 제어 및 모니터링 fly_monitering 호출
 큐 생성
   ↓
@@ -72,4 +72,28 @@ if __name__ == "__main__":
     asyncio.run(run())
 
 ## 구현 결과
-
+charging_station :2차원 리스트 튜플
+  ↓
+**함수 정의**
+GPS 지구 모형 반영 최단거리 계산 함수 (하버사인 공식 사용)  
+최단 경로 노드 계산 함수  
+비상착륙 함수 
+GPS error함수
+오프보드 모드 활성화 함수
+바람 기울기 변화 조정 함수
+  ↓
+이벤트 루프: drone, state_queue, emergency_states인자
+드론오류 상태 초기값=False: 딕셔너리
+큐 생성
+  ↓
+**메인 함수** `async def run()`  
+이륙 명령 
+드론오류 상태 초기값=False: 딕셔너리
+큐 생성
+오프로드 활성화 호출
+user_input태스크 생성
+  ↓
+async def user_input함수 정의: whil True+if조건문
+  ↓
+  ↓
+드론오류 상태 초기값=False: 딕셔너리
