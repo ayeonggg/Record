@@ -1,21 +1,33 @@
 # 리눅스 터미널 실행 명령어
 
 cd /home/ayeong/catkin_ws/PX4-Autopilot
+
 [gazebo start lat,long fix command]
+
 echo "export PX4_HOME_LAT=35.1545288" >> ~/.bashrc
+
 echo "export PX4_HOME_LON=128.0933887" >> ~/.bashrc
+
 echo "export PX4_HOME_ALT=30" >> ~/.bashrc
+
 cd /home/ayeong/catkin_ws/PX4-Autopilot
+
 make px4_sitl gazebo
+
 
 /home/ayeong/QgroundControl.AppImage
 
 
 [lat,log choose&twice faster]
+
 export PX4_HOME_LAT=35.1545288
+
 export PX4_HOME_LON=128.0933887
+
 export PX4_HOME_ALT=30
+
 export PX_SIM_SPEED_FACTOR=2
+
 
 ## 초기 코드 구상
 charging_station: 2차원 리스트 튜플  
