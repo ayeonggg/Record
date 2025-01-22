@@ -113,9 +113,11 @@ if 엔진 오류 상황
 if 배터리 부족 상황
 if 바람 감지 상황
                 ↓
+                
 async def fly_monitering함수 정의
                 
                 ↓      
+                
 **메인 함수** `async def run()`  
 이륙 명령 
 드론오류 상태 초기값=False: 딕셔너리
@@ -128,5 +130,6 @@ async def fly_monitering함수 호출
 async def user_input함수 정의: whil True+if조건문
 if a=='state'
                 ↓ 
+                
  if __name__ == "__main__":
     asyncio.run(run())               
