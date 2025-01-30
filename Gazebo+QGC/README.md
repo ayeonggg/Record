@@ -59,10 +59,12 @@ if __name__ == "__main__":
 
 ## 구현 중간 상황
 charging_station :2차원 리스트 튜플
+
                 ↓ 
                 
 **드론오류 상태 초기값**딕셔너리
 False로 초기 비행 시작
+
                 ↓ 
                 
 **함수 정의**
@@ -75,16 +77,19 @@ GPS 지구 모형 반영 최단거리 계산 함수 (하버사인 공식 사용)
 배터리 부족 함수
 async def user_input함수 정의: if조건문
 async def fly_monitering함수 정의
+
                 ↓ 
                 
 **이벤트 루프** drone, state_queue인자
 드론 제어 및 모니터링 fly_monitering 호출
 큐 생성
+
                 ↓ 
                 
 **메인 함수** `async def run()`  
 이륙 명령  
 사용자 드론 상태 입력user_input 호출
+
                 ↓ 
                 
 if __name__ == "__main__":
