@@ -1,0 +1,17 @@
+<library path="src/my_rqt_video_plugin">
+  <class name="MyCategory/MyPlugin" 
+         type="my_rqt_video_plugin.video_plugin.VideoPlugin" 
+         base_class_type="rqt_gui_py::Plugin">
+    <description>Custom RQt plugin to display image topics</description>
+    <qtgui>
+      <group>
+        <label>MyCategory</label>
+        <icon type="theme">folder</icon>
+        <statustip>Custom plugin group</statustip>
+      </group>
+      <label>MyPlugin</label>
+      <icon type="theme">image-x-generic</icon>
+      <statustip>Displays image on UI</statustip>
+    </qtgui>
+  </class>
+</library>
