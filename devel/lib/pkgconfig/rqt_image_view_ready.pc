@@ -1,8 +1,0 @@
-prefix=/home/kitech/catkin_ws/devel
-
-Name: rqt_image_view_ready
-Description: Description of rqt_image_view_ready
-Version: 0.0.1
-Cflags: 
-Libs: -L${prefix}/lib 
-Requires: 
