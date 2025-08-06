@@ -47,11 +47,11 @@ class VideoPlugin(Plugin):
 
     def subscribe_rgb(self):
         if not self.sub_rgb:
-            self.sub_rgb = rospy.Subscriber("/video_rgb", Image, self.cb_rgb)
+            self.sub_rgb = rospy.Subscriber("/yolov11/segmentation", Image, self.cb_rgb)
 
     def subscribe_meta(self):
         if not self.sub_meta:
-            self.sub_meta = rospy.Subscriber("/video_meta", Image, self.cb_meta)
+            self.sub_meta = rospy.Subscriber("/yolov11/segmentation", Image, self.cb_meta)
 
     def cb_rgb(self, msg):
         self.update_image(msg, self.label_rgb)
